@@ -16,14 +16,21 @@ jobs:
       DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Debug repository structure
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "Repo contents:"
+          ls -la
 
       - name: Set up Databricks CLI
         uses: databricks/setup-cli@v0.221.0
 
-      - name: Validate bundle
+      - name: Validate Databricks bundle
         run: databricks bundle validate
 
-      - name: Deploy to Dev
+      - name: Deploy bundle to dev
         run: databricks bundle deploy -t dev
