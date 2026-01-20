@@ -9,12 +9,12 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    # 🔑 This is CRITICAL: bundle root
+    
     defaults:
       run:
         working-directory: my_project
 
-    # 🔐 Databricks authentication (non-interactive)
+    
     env:
       DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
       DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
