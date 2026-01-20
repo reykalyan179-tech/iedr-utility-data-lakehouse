@@ -2,11 +2,13 @@ name: Deploy Databricks Bundle
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
-  deploy:
+  deploy-dev:
+    name: Deploy to Dev
     runs-on: ubuntu-latest
 
     env:
@@ -21,9 +23,7 @@ jobs:
         uses: databricks/setup-cli@v0.221.0
 
       - name: Validate bundle
-        working-directory: my_project
         run: databricks bundle validate
 
-      - name: Deploy to dev
-        working-directory: my_project
+      - name: Deploy to Dev
         run: databricks bundle deploy -t dev
