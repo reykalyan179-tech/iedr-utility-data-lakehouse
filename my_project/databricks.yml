@@ -6,9 +6,9 @@ include:
 
 variables:
   catalog:
-    description: The catalog to use (workspace or main)
-  schema_prefix:
-    description: Prefix for schemas (iedr_dev_, iedr_qa_, iedr_prod_)
+    description: Unity Catalog name
+  target_schema:
+    description: Target schema for DLT pipeline (per environment)
 
 targets:
   dev:
@@ -18,7 +18,7 @@ targets:
       host: https://dbc-e775cabb-a867.cloud.databricks.com
     variables:
       catalog: workspace
-      schema_prefix: dev
+      target_schema: iedr_dev
 
   qa:
     mode: development
@@ -26,17 +26,16 @@ targets:
       host: https://dbc-e775cabb-a867.cloud.databricks.com
     variables:
       catalog: workspace
-      schema_prefix: qa
+      target_schema: iedr_qa
 
   prod:
-   mode: production
-   workspace:
-     host: https://dbc-e775cabb-a867.cloud.databricks.com
-     root_path: /Workspace/Users/mravindra0911@gmail.com/.bundle/${bundle.name}/${bundle.target}
-   variables:
-    catalog: workspace
-    schema_prefix: prod
-
+    mode: production
+    workspace:
+      host: https://dbc-e775cabb-a867.cloud.databricks.com
+      root_path: /Workspace/Users/mravindra0911@gmail.com/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      catalog: workspace
+      target_schema: iedr_prod
 
 resources:
   jobs:
@@ -47,7 +46,7 @@ resources:
           notebook_task:
             notebook_path: notebooks/bronze_ingest.ipynb
             base_parameters:
-              env: ${var.schema_prefix}
+              env: ${var.target_schema}
 
         - task_key: silver_transform
           depends_on:
@@ -55,4 +54,4 @@ resources:
           notebook_task:
             notebook_path: notebooks/silver_transformation.ipynb
             base_parameters:
-              env: ${var.schema_prefix}
+              env: ${var.target_schema}
