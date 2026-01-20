@@ -1,4 +1,4 @@
-name: Deploy Databricks Bundle (DEV → QA → PROD)
+name: Deploy Databricks Bundle
 
 on:
   push:
@@ -9,12 +9,12 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    # 🔑 Bundle root
+    
     defaults:
       run:
         working-directory: my_project
 
-    # 🔐 Databricks authentication
+    
     env:
       DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
       DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
@@ -29,24 +29,8 @@ jobs:
       - name: Verify Databricks auth
         run: databricks auth describe
 
-      # ---------- DEV ----------
-      - name: Validate bundle (DEV)
+      - name: Validate bundle
         run: databricks bundle validate -t dev
 
       - name: Deploy to DEV
         run: databricks bundle deploy -t dev
-
-      # ---------- QA ----------
-      - name: Validate bundle (QA)
-        run: databricks bundle validate -t qa
-
-      - name: Deploy to QA
-        run: databricks bundle deploy -t qa
-
-      # ---------- PROD ----------
-      - name: Validate bundle (PROD)
-        run: databricks bundle validate -t prod
-
-      - name: Deploy to PROD
-        run: databricks bundle deploy -t prod
-
