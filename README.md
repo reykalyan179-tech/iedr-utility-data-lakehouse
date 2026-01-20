@@ -1,5 +1,3 @@
-# iedr-utility-data-lakehouse
-Data pipeline for Integrated Energy Data Resource (IEDR) using medallion architecture
 # IEDR Utility Data Lakehouse Pipeline
 
 Cloud-based medallion architecture for NY utilities DER & hosting capacity data.

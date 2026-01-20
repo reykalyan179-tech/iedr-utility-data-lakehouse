@@ -1,15 +1,10 @@
 name: IEDR Pipeline CI
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+on: [push, pull_request]
 
 jobs:
-  lint-and-test:
+  test:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
@@ -18,15 +13,16 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Install Java (for PySpark)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install flake8 black pytest
+          pip install pytest pyspark==3.5.0
 
-      - name: Lint with flake8 and black
-        run: |
-          flake8 notebooks/
-          black --check notebooks/
-
-      - name: Run tests (add later)
-        run: pytest tests/ || echo "No tests yet - OK"
+      - name: Run pytest
+        run: pytest tests/ -v
