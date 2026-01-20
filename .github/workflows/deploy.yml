@@ -2,35 +2,38 @@ name: Deploy Databricks Bundle
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    # 🔑 This is CRITICAL: bundle root
     defaults:
       run:
         working-directory: my_project
 
+    # 🔐 Databricks authentication (non-interactive)
     env:
       DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
       DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
       - name: Set up Databricks CLI
         uses: databricks/setup-cli@main
 
       - name: Verify Databricks auth
-        run: |
-          echo "Host is set"
-          databricks auth describe || true
+        run: databricks auth describe
 
-      - name: Validate Databricks bundle
-        run: databricks bundle validate
+      - name: Validate bundle
+        run: databricks bundle validate -t dev
 
-      - name: Deploy bundle to dev
+      - name: Deploy to DEV
         run: databricks bundle deploy -t dev
+
 
 
