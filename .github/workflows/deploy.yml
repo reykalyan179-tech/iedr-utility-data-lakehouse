@@ -10,7 +10,11 @@ jobs:
 
     defaults:
       run:
-        working-directory: my_project   # 🔥 THIS IS THE FIX
+        working-directory: my_project
+
+    env:
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
 
     steps:
       - uses: actions/checkout@v4
@@ -18,7 +22,12 @@ jobs:
       - name: Set up Databricks CLI
         uses: databricks/setup-cli@main
 
-      - name: Validate bundle
+      - name: Verify Databricks auth
+        run: |
+          echo "Host is set"
+          databricks auth describe || true
+
+      - name: Validate Databricks bundle
         run: databricks bundle validate
 
       - name: Deploy bundle to dev
