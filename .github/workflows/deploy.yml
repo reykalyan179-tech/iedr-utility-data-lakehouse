@@ -23,5 +23,5 @@ jobs:
 
       - name: Deploy bundle to dev
         run: databricks bundle deploy -t dev
-t dev
+
 
