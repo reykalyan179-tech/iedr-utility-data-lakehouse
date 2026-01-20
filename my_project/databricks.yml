@@ -1,0 +1,58 @@
+bundle:
+  name: iedr-utility-data-lakehouse
+
+include:
+  - resources/*.yml
+
+variables:
+  catalog:
+    description: The catalog to use (workspace or main)
+  schema_prefix:
+    description: Prefix for schemas (iedr_dev_, iedr_qa_, iedr_prod_)
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://dbc-e775cabb-a867.cloud.databricks.com
+    variables:
+      catalog: workspace
+      schema_prefix: dev
+
+  qa:
+    mode: development
+    workspace:
+      host: https://dbc-e775cabb-a867.cloud.databricks.com
+    variables:
+      catalog: workspace
+      schema_prefix: qa
+
+  prod:
+   mode: production
+   workspace:
+     host: https://dbc-e775cabb-a867.cloud.databricks.com
+     root_path: /Workspace/Users/mravindra0911@gmail.com/.bundle/${bundle.name}/${bundle.target}
+   variables:
+    catalog: workspace
+    schema_prefix: prod
+
+
+resources:
+  jobs:
+    iedr_pipeline:
+      name: iedr-${bundle.target}-pipeline
+      tasks:
+        - task_key: bronze_ingest
+          notebook_task:
+            notebook_path: notebooks/bronze_ingest.ipynb
+            base_parameters:
+              env: ${var.schema_prefix}
+
+        - task_key: silver_transform
+          depends_on:
+            - task_key: bronze_ingest
+          notebook_task:
+            notebook_path: notebooks/silver_transformation.ipynb
+            base_parameters:
+              env: ${var.schema_prefix}
