@@ -13,10 +13,16 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Install Java (for PySpark)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest
+          pip install pytest pyspark==3.5.0
 
       - name: Run pytest
-        run: pytest tests/No tests yet - OK"
+        run: pytest tests/ -v
