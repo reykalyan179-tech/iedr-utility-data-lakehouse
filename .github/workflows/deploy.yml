@@ -2,58 +2,26 @@ name: Deploy Databricks Bundle
 
 on:
   push:
-    branches:
-      - main
-  workflow_dispatch:
+    branches: [main]
 
 jobs:
-  deploy-dev:
-    name: Deploy Databricks Bundle to Dev
+  deploy:
     runs-on: ubuntu-latest
 
-    # Databricks authentication for CI
-    env:
-      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
-      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+    defaults:
+      run:
+        working-directory: my_project   # 🔥 THIS IS THE FIX
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      # Debug step so you can SEE what GitHub runner sees
-      - name: Debug repository structure
-        run: |
-          echo "Current directory:"
-          pwd
-          echo "Repo root contents:"
-          ls -la
-          echo "Contents of my_project:"
-          ls -la my_project
+      - uses: actions/checkout@v4
 
       - name: Set up Databricks CLI
-        uses: databricks/setup-cli@v0.221.0
+        uses: databricks/setup-cli@main
 
-      # Sanity check that auth secrets exist (safe, does not print secrets)
-      - name: Debug Databricks auth
-        run: |
-          echo "DATABRICKS_HOST=$DATABRICKS_HOST"
-          if [ -z "$DATABRICKS_TOKEN" ]; then
-            echo "ERROR: DATABRICKS_TOKEN is missing"
-            exit 1
-          else
-            echo "DATABRICKS_TOKEN is present"
-          fi
-
-      - name: Confirm notebooks exist
-        run: |
-          ls my_project/notebooks
-
-
-      - name: Validate Databricks bundle
-        working-directory: my_project
+      - name: Validate bundle
         run: databricks bundle validate
 
       - name: Deploy bundle to dev
-        working-directory: my_project
         run: databricks bundle deploy -t dev
+t dev
 
