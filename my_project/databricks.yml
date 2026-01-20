@@ -45,7 +45,7 @@ resources:
       tasks:
         - task_key: bronze_ingest
           notebook_task:
-            notebook_path: notebooks/bronze_ingest.ipynb
+            notebook_path: ./notebooks/bronze_ingest.ipynb
             base_parameters:
               env: ${var.schema_prefix}
 
@@ -53,6 +53,6 @@ resources:
           depends_on:
             - task_key: bronze_ingest
           notebook_task:
-            notebook_path: notebooks/silver_transformation.ipynb
+            notebook_path: ./notebooks/silver_transformation.ipynb
             base_parameters:
               env: ${var.schema_prefix}
