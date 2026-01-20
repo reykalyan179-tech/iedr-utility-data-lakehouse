@@ -19,18 +19,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Debug repository structure
+      - name: Debug repo structure
         run: |
-          echo "Current directory:"
           pwd
-          echo "Repo contents:"
           ls -la
+          echo "Contents of my_project:"
+          ls -la my_project
 
       - name: Set up Databricks CLI
         uses: databricks/setup-cli@v0.221.0
 
       - name: Validate Databricks bundle
+        working-directory: my_project
         run: databricks bundle validate
 
       - name: Deploy bundle to dev
+        working-directory: my_project
         run: databricks bundle deploy -t dev
