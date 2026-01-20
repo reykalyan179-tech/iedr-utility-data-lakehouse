@@ -44,6 +44,11 @@ jobs:
             echo "DATABRICKS_TOKEN is present"
           fi
 
+      - name: Confirm notebooks exist
+        run: |
+          ls my_project/notebooks
+
+
       - name: Validate Databricks bundle
         working-directory: my_project
         run: databricks bundle validate
