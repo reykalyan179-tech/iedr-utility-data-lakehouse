@@ -9,6 +9,8 @@ variables:
     description: Unity Catalog name
   target_schema:
     description: Target schema for DLT pipeline (per environment)
+  dlt_development:
+    description: Enable DLT development mode
 
 targets:
   dev:
@@ -18,7 +20,8 @@ targets:
       host: https://dbc-e775cabb-a867.cloud.databricks.com
     variables:
       catalog: workspace
-      target_schema: iedr_dev
+      target_schema: dev
+      dlt_development: true
 
   qa:
     mode: development
@@ -26,7 +29,8 @@ targets:
       host: https://dbc-e775cabb-a867.cloud.databricks.com
     variables:
       catalog: workspace
-      target_schema: iedr_qa
+      target_schema: qa
+      dlt_development: true
 
   prod:
     mode: production
@@ -35,7 +39,8 @@ targets:
       root_path: /Workspace/Users/mravindra0911@gmail.com/.bundle/${bundle.name}/${bundle.target}
     variables:
       catalog: workspace
-      target_schema: iedr_prod
+      target_schema: prod
+      dlt_development: false
 
 resources:
   jobs:
