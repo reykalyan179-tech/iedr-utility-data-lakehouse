@@ -1,13 +1,13 @@
 resources:
   pipelines:
     my_project_etl:
-      name: my_project_etl_${bundle.target}
+      name: iedr-${bundle.target}-pipeline
 
       catalog: ${var.catalog}
       schema: ${var.target_schema}
 
       serverless: true
-      development: true
+      development: ${var.dlt_development}
 
       libraries:
         - notebook:
