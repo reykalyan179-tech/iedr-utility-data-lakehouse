@@ -1,100 +1,96 @@
-IEDR Utility Data Lakehouse
+# IEDR Utility Data Lakehouse Pipeline
 
-This repository contains a Databricks-based data pipeline that ingests, cleans, and publishes utility data using a medallion architecture. The project demonstrates production-style data engineering practices including environment separation, CI/CD-driven deployments, and testable transformations.
+End-to-end data pipeline for the **Integrated Energy Data Resource (IEDR)** project, built to ingest, process, and serve utility data (circuits, installed DERs, planned DERs) from New York utilities in a cloud-based lakehouse.
 
-What This Project Does
+This project was developed as part of a Data Engineer III interview task using **Databricks Premium Trial** (with $400 credits). It demonstrates a full **medallion architecture**, environment separation, Git integration, unit testing, CI, and job orchestration.
 
-Ingests monthly utility CSV files
+## Project Overview
 
-Preserves raw data with metadata for auditability
+The pipeline ingests raw CSV data from multiple utilities, normalizes it into a common model (handling differences like segment vs feeder level), and produces API-ready tables for the IEDR SaaS application.
 
-Normalizes and aggregates data into a unified model
+### Key Requirements Satisfied
 
-Publishes API-ready tables for downstream applications
+- Common data model across utilities (hides source differences)
+- Supports two main API queries:
+  - Feeders with max hosting capacity > X MW
+  - All installed + planned DERs for a given feeder ID
+- Highlights missing data, refresh dates, volume, and quality stats
+- Monthly incremental updates (append mode in bronze)
 
-Deploys Databricks jobs using Git-based CI/CD
+## Medallion Architecture
 
-Supports separate dev, QA, and prod environments
+- **Bronze Layer** — Raw ingestion of 6 CSVs (circuits, installed DER, planned DER) with metadata (utility_id, ingest_timestamp, source_file)
+  - Tables: `utility1_circuits`, `utility1_install_der`, `utility1_planned_der`, etc.
+  - Stored in `iedr_[env]_bronze` schemas
 
-Architecture
+- **Silver Layer** — Normalization & unification
+  - Aggregates utility1 segments to feeders
+  - Combines installed/planned DERs with common columns (feeder_id, der_type, nameplate_rating_mw, status)
+  - Tables: `feeders`, `der_records`
+  - Stored in `iedr_[env]_silver`
 
-The pipeline follows a medallion pattern:
+- **Platinum Layer** — API-optimized
+  - `feeder_capacity`: aggregated feeders with DER counts
+  - `der_details`: detailed DER records per feeder
+  - `data_quality_summary`: refresh dates, row counts, missing data
+  - Stored in `iedr_[env]_platinum`
 
-Bronze (Raw)
+## Environments (Dev / QA / Prod)
 
-Raw CSV ingestion
+Simulated using schema prefixes (`iedr_dev_*`, `iedr_qa_*`, `iedr_prod_*`) and jobs pass `env` parameter → same notebooks write to correct schemas.
 
-No transformations
+## Git & Version Control
 
-Metadata captured (source file, load timestamp)
+- Repo: https://github.com/reykalyan179-tech/iedr-utility-data-lakehouse
+- Structure:
+  - `notebooks/` — Databricks .ipynb files (bronze ingest, silver transform)
+  - `tests/` — pytest unit tests
+  - `my_project/` — DAB config (databricks.yml, resources/)
+  - `docs/` — architecture documentation
+  - `.github/workflows/` — CI pipeline
 
-Incremental loads supported
+- Branching: main (production-ready), develop (integration), feature/* (new work)
 
-Silver (Transformed)
+## SDLC Process (DevOps Approach)
 
-Column standardization
+1. **Planning** — Define requirements, data model, env separation
+2. **Development** — Build notebooks in Databricks, export to Git
+3. **Testing** — Local pytest + GitHub Actions CI (lint + tests on push/PR)
+4. **Deployment** — DAB deploy (`databricks bundle deploy -t dev/qa/prod`) → jobs updated
+5. **Monitoring** — Job runs/logs in Workflows, data quality summary in platinum
 
-Data type normalization
+Changes flow: Edit notebook → export → commit/push → CI runs → deploy → jobs run → data in correct env schemas.
 
-Feeder-level aggregation
+GitHub Actions auto-deploys to separate dev/qa/prod workspaces.
 
-Basic data quality checks
+## How the Pipeline Works
 
-Platinum (Serving)
+1. Raw CSVs uploaded to Volume (`iedr_raw`)
+2. Bronze job loads CSVs to raw Delta tables in `iedr_[env]_bronze`
+3. Silver job reads bronze → normalizes → saves to `iedr_[env]_silver`
+4. Platinum logic (in silver notebook) creates API tables in `iedr_[env]_platinum`
+5. Application queries platinum tables (e.g. `feeder_capacity WHERE max_hosting_capacity_mw > 5`)
 
-Tables optimized for API access
+## Setup & Run
 
-Consolidated feeder and DER datasets
+1. Clone repo: git clone https://github.com/reykalyan179-tech/iedr-utility-data-lakehouse.git
+2. Import notebooks to Databricks workspace.
 
-Data quality summary tables
+3. Create Volume `iedr_raw` and upload 6 CSVs.
 
-Repository Structure
-.
-├── notebooks/
-│   ├── bronze_ingest.ipynb
-│   ├── silver_transformation.ipynb
-│   └── platinum_publish.ipynb
-├── tests/
-│   └── test_transforms.py
-├── ci/
-│   └── deploy.yml
-├── docs/
-│   └── architecture.md
-└── README.md
+4. Run SQL to create schemas:
+%sql
+CREATE SCHEMA IF NOT EXISTS iedr_dev_bronze;
+Repeat for silver/platinum, qa, prod
 
-Environments
+5. Deploy jobs with DAB:textcd my_project
+databricks bundle deploy -t dev
+databricks bundle deploy -t qa
+databricks bundle deploy -t prod
 
-The same codebase is deployed to multiple environments:
+6. Run jobs in Workflows
 
-dev – development and validation
+## Testing
+pytest tests/ - GitHub Actions CI runs pytest + linting on every push/PR.
 
-qa – integration testing
 
-prod – production runs
-
-Environment-specific behavior is controlled through parameters passed at job runtime. No logic is duplicated between environments.
-
-Deployment
-
-Databricks jobs are deployed from Git using CI/CD.
-
-Jobs are defined and managed as code
-
-No manual UI changes are required
-
-CI pipeline deploys jobs per environment
-
-Git is the single source of truth
-
-Testing
-
-Transformation logic is covered by pytest unit tests
-
-Tests validate business logic and expected outputs
-
-CI runs tests on pull requests and merges
-
-Notes
-
-This project is intentionally scoped as a reference implementation.
-The same patterns can be extended with orchestration, monitoring, and infrastructure-as-code for larger-scale production systems.
