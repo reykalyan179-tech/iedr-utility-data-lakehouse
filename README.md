@@ -2,7 +2,7 @@
 
 End-to-end data pipeline for the **Integrated Energy Data Resource (IEDR)** project, built to ingest, process, and serve utility data (circuits, installed DERs, planned DERs) from New York utilities in a cloud-based lakehouse.
 
-This project was developed as part of a Data Engineer III interview task using **Databricks Premium Trial** (with $400 credits). It demonstrates a full **medallion architecture**, environment separation, Git integration, unit testing, CI, and job orchestration.
+This project was developed as part of a Data Engineer III interview task using **Databricks** . It demonstrates a full **medallion architecture**, environment separation, Git integration, unit testing, CI, and job orchestration.
 
 ## Project Overview
 
